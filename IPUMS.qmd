@@ -3,7 +3,7 @@ title: "IPUMS Doctoral Degree Estimation"
 format: pdf
 editor: visual
 author: 
-  - Aviral Bhardwaj
+  - Aviral Bhardwaj, Arshh Relan, Akshat Aneja, Yuxin Sun, Harsh Pareek
 thanks: "Code and data are available at: https://github.com/Aviral-03/IPUMS-Education-Doctorate"
 ---
 
