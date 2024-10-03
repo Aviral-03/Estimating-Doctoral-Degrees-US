@@ -1,10 +1,10 @@
 ---
-title: "IPUMS"
+title: "IPUMS Doctoral Degree Estimation"
 format: pdf
 editor: visual
 author: 
   - Aviral Bhardwaj
-thanks: "Code and data are available at: "
+thanks: "Code and data are available at: https://github.com/Aviral-03/IPUMS-Education-Doctorate"
 ---
 
 ```{r}
