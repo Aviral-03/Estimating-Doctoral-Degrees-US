@@ -1,0 +1,212 @@
+---
+title: "Estimating Doctoral Degree Holders Across U.S. States"
+subtitle: "Using California Doctoral Degree Literacy Rates as a Reference for State-Level Estimations"
+format: pdf
+editor: visual
+author: 
+  - Aviral Bhardwaj, Arshh Relan, Akshat Aneja, Yuxin Sun, Harsh Pareek
+thanks: "Code and data are available at: https://github.com/Aviral-03/IPUMS-Education-Doctorate"
+date: today
+date-format: long
+abstract: "This report employs IPUMS data to estimate the number of doctoral degree holders in each U.S. state by using California's ratio of doctoral degree holders to total respondents as a benchmark. The analysis reveals significant variations in the estimated and actual counts of doctoral degree holders across states, highlighting discrepancies in educational attainment. This study highlights the importance of understanding educational distributions, as they influence workforce qualifications and inform policy decisions."
+bibliography: references.bib
+---
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+library(dplyr)
+library(R.utils)
+library(readr)
+library(tibble)
+library(kableExtra)
+```
+
+## Instructions to download IPUMS data
+
+1.  Go to the [IPUMS website](https://usa.ipums.org/usa-action/variables/group)
+2.  Click on "Select Samples" to choose the samples we want to download
+3.  Unselect "Default sample from each year"
+4.  Choose "2022 ACS"
+5.  Click on "Submit Sample Selections"
+6.  Navigate to the section called "Select Harmonized Variables"
+7.  Hover over "Household" and click on "Geographic"
+8.  Select "STATEICP" by clicking on the "+" icon.
+9.  Hover over "Person" and click on "Demographics"
+10. Select "SEX" by clicking on the "+" icon.
+11. Hover over "Person" and click on "Education"
+12. Select "EDUC" by clicking on the "+" icon.
+13. Click on "View Cart" and then "Create Data Extract"
+14. Choose the format "CSV" under "Data Format"
+15. Click on "Submit Extract Request"
+16. Create an account or log in to download the data
+
+\newpage
+
+## Data
+The raw data was sourced from the IPUMS data [@Ruggles2024] package. Three data points were added from year 2022: Sex of Respondants, Education background and State Codes. The data, provided in CSV formats, was cleaned and analyzed using R [@citeR] programming language. Other R packages used include `tidyverse` [@tidyverse], `styler` [@styler], and `dplyr` [@dplyr] for creating tables. The `ggplot2` [@ggplot2] and `kableExtra` [@kableExtra] were used for data visualization and table formatting.
+
+This analysis uses the IPUMS data to estimate the number of respondents with doctoral degrees in each state of the U.S. The data includes information on educational attainment, state of residence, and other demographic variables for a sample of respondents and sex of the respondents [@Ruggles2024].  
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+
+# Unzip gz file (uncomment the following code only if the data is in a gz file)
+
+# gzfile <- "usa_00002.csv.gz"
+# gunzip(gzfile, remove = FALSE)
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+# Data Preparation
+ipums_data <- read_csv("usa_00002.csv")
+
+# Convert data to tibble
+ipums_data <- as_tibble(ipums_data)
+```
+
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+# Respondents with Doctoral Degree by State
+
+# Filter data for respondents with doctoral degree
+doctoral_data <- ipums_data |>
+  filter(EDUCD == 116) |>
+  group_by(STATEICP) |>
+  summarise(total_doctoral_count = n())
+
+```
+
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+# Ratio of Respondents with Doctoral Degree by State
+
+# Total number of respondents by state 
+total_data <- ipums_data |>
+  group_by(STATEICP) |>
+  summarise(total_respondants = n())
+
+# Merge the two datasets
+state_data <- left_join(doctoral_data, total_data, by = "STATEICP")
+
+# California total doctoral degree holders
+california_data <- state_data |>
+  filter(STATEICP == 71)
+
+california_total_respondents <- 391171
+
+# Ratio of respondents with doctoral degree for california
+california_ratio <- california_data$total_doctoral_count / california_total_respondents
+
+# Apply the ratio to get the estimated total respondents
+#state_data <- state_data |>
+ # mutate(estimated_total_respondents = total_respondants * california_ratio)
+
+state_data <- state_data |>
+  mutate(estimated_total_respondents = total_doctoral_count / california_ratio)
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+
+
+state_names <- data.frame(
+  STATEICP = c(01, 02, 03, 04, 05, 06, 11, 12, 13, 14,
+               21, 22, 23, 24, 25, 31, 32, 33, 34, 35,
+               36, 37, 40, 41, 42, 43, 44, 45, 46, 47,
+               48, 49, 51, 52, 53, 54, 56, 61, 62, 63,
+               64, 65, 66, 67, 68, 71, 72, 73, 81, 82,
+               83, 96, 97, 98, 99),
+  State = c("Connecticut", "Maine", "Massachusetts", "New Hampshire", "Rhode Island", "Vermont",
+            "Delaware", "New Jersey", "New York", "Pennsylvania", "Illinois", "Indiana",
+            "Michigan", "Ohio", "Wisconsin", "Iowa", "Kansas", "Minnesota", "Missouri",
+            "Nebraska", "North Dakota", "South Dakota", "Virginia", "Alabama", "Arkansas",
+            "Florida", "Georgia", "Louisiana", "Mississippi", "North Carolina", "South Carolina",
+            "Texas", "Kentucky", "Maryland", "Oklahoma", "Tennessee", "West Virginia", "Arizona",
+            "Colorado", "Idaho", "Montana", "Nevada", "New Mexico", "Utah", "Wyoming",
+            "California", "Oregon", "Washington", "Alaska", "Hawaii", "Puerto Rico",
+            "State groupings (1980 Urban/rural sample)", "Military/Mil. Reservations", 
+            "District of Columbia", "State not identified")
+)
+
+state_tibble <- as_tibble(state_data)
+
+```
+
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+
+# Comparison of Estimates and Actual Values
+
+# Calculate the difference between the estimated and actual values
+state_data <- state_data |>
+  mutate(difference = estimated_total_respondents - total_respondants)
+
+# Replace the state codes with their names
+state_data <- left_join(state_data, state_names, by = "STATEICP")
+
+# Use kable to display the 10 states with the largest differences do not include the state number
+state_data <- state_data |>
+  arrange(desc(difference)) |>
+  head(10)
+
+# get only the state names, total respondents, estimated total respondents and the difference
+final_data <- state_data |>
+  select(State, total_doctoral_count, total_respondants, estimated_total_respondents, difference)
+
+
+# Round the values to 2 decimal places
+final_data <- final_data |>
+  mutate(total_doctoral_count = round(total_doctoral_count, 2),
+         total_respondants = round(total_respondants, 2),
+         estimated_total_respondents = round(estimated_total_respondents, 2),
+         difference = round(difference, 2))
+
+# Rename the columns
+colnames(final_data) <- c("State", "Doctoral Degree Holders", "Actual Total Respondents", "Estimated Total Respondents", "Difference")
+
+```
+
+```{r}
+#| warning: false
+#| message: false
+#| echo: false
+#| fig.width: 10
+#| fig.height: 6
+#| fig.align: center
+#| tbl-cap: "Comparison of Respondents with Doctoral Degrees by State"
+
+# Display the table
+kable(final_data)
+```
+
+# Discussion
+
+The differences between the estimated and actual number of respondents in each state can arise from the assumption that the ratio of doctoral degree holders to total respondents in California is representative of all states. However, this assumption doesn't account for state-specific variations in educated population or socioeconomic factors.
+
+California has unique characteristics, such as a large population, diverse industries, and numerous research institutions, which may lead to a higher concentration of doctoral degree holders compared to other states. States with smaller populations, fewer universities, or different economic structures might have lower proportions of doctoral degree holders.
+
+Additionally, the distribution of educational attainment across the U.S. is not uniform. States with rural populations, different job markets, or less access to higher education may have lower rates of doctoral degrees, skewing the estimates.
+
+The ratio estimator is a simplified approach, useful for generating rough estimates, but it overlooks local factors that significantly affect educational profiles across states, leading to deviations between the estimated and actual respondent numbers.
+
+# References
+
