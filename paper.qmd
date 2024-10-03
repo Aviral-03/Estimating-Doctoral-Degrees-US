@@ -4,8 +4,9 @@ subtitle: "Using California Doctoral Degree Literacy Rates as a Reference for St
 format: pdf
 editor: visual
 author: 
-  - Aviral Bhardwaj, Arshh Relan, Akshat Aneja, Yuxin Sun, Harsh Pareek
-thanks: "Code and data are available at: https://github.com/Aviral-03/IPUMS-Education-Doctorate"
+  - Aviral Bhardwaj, Arshh Relan, Akshat Aneja, Yuxin Sun, Harsh Pareek,
+  - Susie Wang
+thanks: "Code and data are available at: https://github.com/Aviral-03/Estimating-Doctoral-Degrees-US"
 date: today
 date-format: long
 abstract: "This report employs IPUMS data to estimate the number of doctoral degree holders in each U.S. state by using California's ratio of doctoral degree holders to total respondents as a benchmark. The analysis reveals significant variations in the estimated and actual counts of doctoral degree holders across states, highlighting discrepancies in educational attainment. This study highlights the importance of understanding educational distributions, as they influence workforce qualifications and inform policy decisions."
@@ -24,31 +25,11 @@ library(tibble)
 library(kableExtra)
 ```
 
-## Instructions to download IPUMS data
-
-1.  Go to the [IPUMS website](https://usa.ipums.org/usa-action/variables/group)
-2.  Click on "Select Samples" to choose the samples we want to download
-3.  Unselect "Default sample from each year"
-4.  Choose "2022 ACS"
-5.  Click on "Submit Sample Selections"
-6.  Navigate to the section called "Select Harmonized Variables"
-7.  Hover over "Household" and click on "Geographic"
-8.  Select "STATEICP" by clicking on the "+" icon.
-9.  Hover over "Person" and click on "Demographics"
-10. Select "SEX" by clicking on the "+" icon.
-11. Hover over "Person" and click on "Education"
-12. Select "EDUC" by clicking on the "+" icon.
-13. Click on "View Cart" and then "Create Data Extract"
-14. Choose the format "CSV" under "Data Format"
-15. Click on "Submit Extract Request"
-16. Create an account or log in to download the data
-
-\newpage
-
 ## Data
+
 The raw data was sourced from the IPUMS data [@Ruggles2024] package. Three data points were added from year 2022: Sex of Respondants, Education background and State Codes. The data, provided in CSV formats, was cleaned and analyzed using R [@citeR] programming language. Other R packages used include `tidyverse` [@tidyverse], `styler` [@styler], and `dplyr` [@dplyr] for creating tables. The `ggplot2` [@ggplot2] and `kableExtra` [@kableExtra] were used for data visualization and table formatting.
 
-This analysis uses the IPUMS data to estimate the number of respondents with doctoral degrees in each state of the U.S. The data includes information on educational attainment, state of residence, and other demographic variables for a sample of respondents and sex of the respondents [@Ruggles2024].  
+This analysis uses the IPUMS data to estimate the number of respondents with doctoral degrees in each state of the U.S. The data includes information on educational attainment, state of residence, and other demographic variables for a sample of respondents and sex of the respondents [@Ruggles2024].
 
 ```{r}
 #| warning: false
@@ -72,7 +53,6 @@ ipums_data <- read_csv("usa_00002.csv")
 ipums_data <- as_tibble(ipums_data)
 ```
 
-
 ```{r}
 #| warning: false
 #| message: false
@@ -86,7 +66,6 @@ doctoral_data <- ipums_data |>
   summarise(total_doctoral_count = n())
 
 ```
-
 
 ```{r}
 #| warning: false
@@ -148,7 +127,6 @@ state_tibble <- as_tibble(state_data)
 
 ```
 
-
 ```{r}
 #| warning: false
 #| message: false
@@ -209,4 +187,3 @@ Additionally, the distribution of educational attainment across the U.S. is not 
 The ratio estimator is a simplified approach, useful for generating rough estimates, but it overlooks local factors that significantly affect educational profiles across states, leading to deviations between the estimated and actual respondent numbers.
 
 # References
-
