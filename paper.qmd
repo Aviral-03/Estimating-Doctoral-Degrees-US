@@ -153,10 +153,10 @@ final_data <- state_data |>
 
 # Round the values to 2 decimal places
 final_data <- final_data |>
-  mutate(total_doctoral_count = round(total_doctoral_count, 2),
-         total_respondants = round(total_respondants, 2),
-         estimated_total_respondents = round(estimated_total_respondents, 2),
-         difference = round(difference, 2))
+  mutate(total_doctoral_count = round(total_doctoral_count, 1),
+         total_respondants = round(total_respondants, 1),
+         estimated_total_respondents = round(estimated_total_respondents, 1),
+         difference = round(difference, 1))
 
 # Rename the columns
 colnames(final_data) <- c("State", "Doctoral Degree Holders", "Actual Total Respondents", "Estimated Total Respondents", "Difference")
